@@ -1,6 +1,8 @@
 import 'package:chat_app/screen/auth/login_screen.dart';
+import 'package:chat_app/screen/notification_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -14,11 +16,20 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late TextEditingController _textEditingController;
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  List<RemoteMessage> notifications = [];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? user;
+
+  void getNotification() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        setState(() {
+          notifications.add(message);
+        });
+      }
+    });
+  }
 
   void getUser() {
     user = _auth.currentUser;
@@ -37,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // TODO: implement initState
     getUser();
     getStore();
+    getNotification();
     super.initState();
     _textEditingController = TextEditingController();
   }
@@ -53,12 +65,41 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          NotificationScreen(notifications: notifications),
+                    ));
+              },
+              child: Stack(
+                children: [
+                  const Icon(
+                    Icons.notifications,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                    decoration: const BoxDecoration(
+                        color: Colors.red, shape: BoxShape.circle),
+                    child: Text(
+                      '${notifications.length}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              )),
           IconButton(
               onPressed: () {
                 _auth.signOut();
-                Navigator.pushNamedAndRemoveUntil(context, LoginScreen.id, (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, LoginScreen.id, (route) => false);
               },
-              icon: const Icon(Icons.logout))
+              icon: const Icon(Icons.logout)),
         ],
         title: Row(
           children: [
