@@ -17,7 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   late TextEditingController _textEditingController;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  List<RemoteMessage> notifications = [];
+  List<RemoteNotification?> notifications = [];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? user;
 
@@ -25,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
         setState(() {
-          notifications.add(message);
+          notifications.add(message.notification);
         });
       }
     });
@@ -67,12 +67,19 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           TextButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          NotificationScreen(notifications: notifications),
-                    ));
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) =>
+                //           NotificationScreen(notifications: notifications),
+                //     ));
+                Navigator.pushNamed(context, NotificationScreen.id,
+                        arguments: notifications)
+                    .then((value) {
+                  setState(() {
+                    notifications.clear();
+                  });
+                });
               },
               child: Stack(
                 children: [
@@ -81,16 +88,18 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: Colors.white,
                     size: 28,
                   ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                    decoration: const BoxDecoration(
-                        color: Colors.red, shape: BoxShape.circle),
-                    child: Text(
-                      '${notifications.length}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  )
+                  notifications.isNotEmpty
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 3, vertical: 2),
+                          decoration: const BoxDecoration(
+                              color: Colors.red, shape: BoxShape.circle),
+                          child: Text(
+                            '${notifications.length}',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        )
+                      : const SizedBox(),
                 ],
               )),
           IconButton(

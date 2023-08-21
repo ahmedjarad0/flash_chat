@@ -2,6 +2,7 @@ import 'package:chat_app/screen/auth/login_screen.dart';
 import 'package:chat_app/screen/auth/register_screen.dart';
 import 'package:chat_app/screen/chat_screen.dart';
 import 'package:chat_app/screen/core/welcome_screen.dart';
+import 'package:chat_app/screen/notification_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         RegisterScreen.id: (context) => const RegisterScreen(),
         WelcomeScreen.id: (context) => const WelcomeScreen(),
         ChatScreen.id: (context) => const ChatScreen(),
+        NotificationScreen.id:(context)=> const NotificationScreen( ),
       },
     );
   }
